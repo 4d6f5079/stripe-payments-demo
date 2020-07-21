@@ -16,59 +16,23 @@ module.exports = {
   // Store currency.
   currency: 'eur',
 
-  // Supported payment methods for each currency.
+  // Supported payment methods for the store.
+  // Some payment methods support only a subset of currencies.
   // Make sure to check the docs: https://stripe.com/docs/sources
-  paymentMethodsPerCurrency: {
-    eur: [
-      'alipay', // aud, cad, eur, gbp, hkd, jpy, nzd, sgd, or usd.
-      'bancontact', // eur (Bancontact must always use Euros)
-      'card', // many (https://stripe.com/docs/currencies#presentment-currencies)
-      'eps', // eur (EPS must always use Euros)
-      'ideal', // eur (iDEAL must always use Euros)
-      'giropay', // eur (Giropay must always use Euros)
-      'multibanco', // eur (Multibanco must always use Euros)
-      // 'sepa_debit', // Restricted. See docs for activation details: https://stripe.com/docs/sources/sepa-debit
-      'sofort', // eur (SOFORT must always use Euros)
-      'wechat', // aud, cad, eur, gbp, hkd, jpy, sgd, or usd.
-    ],
-    aud: [
-      'alipay', // aud, cad, eur, gbp, hkd, jpy, nzd, sgd, or usd.
-      'card', // many (https://stripe.com/docs/currencies#presentment-currencies)
-      'wechat', // aud, cad, eur, gbp, hkd, jpy, sgd, or usd.
-      'au_becs_debit', //aud
-    ],
-    cad: [
-      'alipay', // aud, cad, eur, gbp, hkd, jpy, nzd, sgd, or usd.
-      'card', // many (https://stripe.com/docs/currencies#presentment-currencies)
-      'wechat', // aud, cad, eur, gbp, hkd, jpy, sgd, or usd.
-    ],
-    gbp: [
-      'alipay', // aud, cad, eur, gbp, hkd, jpy, nzd, sgd, or usd.
-      'card', // many (https://stripe.com/docs/currencies#presentment-currencies)
-      'wechat', // aud, cad, eur, gbp, hkd, jpy, sgd, or usd.
-    ],
-    jpy: [
-      'alipay', // aud, cad, eur, gbp, hkd, jpy, nzd, sgd, or usd.
-      'card', // many (https://stripe.com/docs/currencies#presentment-currencies)
-      'wechat', // aud, cad, eur, gbp, hkd, jpy, sgd, or usd.
-    ],
-    nzd: [
-      'alipay', // aud, cad, eur, gbp, hkd, jpy, nzd, sgd, or usd.
-      'card', // many (https://stripe.com/docs/currencies#presentment-currencies)
-      'wechat', // aud, cad, eur, gbp, hkd, jpy, sgd, or usd.
-    ],
-    sgd: [
-      'alipay', // aud, cad, eur, gbp, hkd, jpy, nzd, sgd, or usd.
-      'card', // many (https://stripe.com/docs/currencies#presentment-currencies)
-      'wechat', // aud, cad, eur, gbp, hkd, jpy, sgd, or usd.
-    ],
-    usd: [
-      'alipay', // aud, cad, eur, gbp, hkd, jpy, nzd, sgd, or usd.
-      'card', // many (https://stripe.com/docs/currencies#presentment-currencies)
-      'wechat', // aud, cad, eur, gbp, hkd, jpy, sgd, or usd.
-    ],
-
-},
+  paymentMethods: [
+    // 'ach_credit_transfer', // usd (ACH Credit Transfer payments must be in U.S. Dollars)
+    'alipay', // aud, cad, eur, gbp, hkd, jpy, nzd, sgd, or usd.
+    'bancontact', // eur (Bancontact must always use Euros)
+    'card', // many (https://stripe.com/docs/currencies#presentment-currencies)
+    'eps', // eur (EPS must always use Euros)
+    'ideal', // eur (iDEAL must always use Euros)
+    'giropay', // eur (Giropay must always use Euros)
+    'multibanco', // eur (Multibanco must always use Euros)
+    // 'sepa_debit', // Restricted. See docs for activation details: https://stripe.com/docs/sources/sepa-debit
+    'sofort', // eur (SOFORT must always use Euros)
+    'wechat', // aud, cad, eur, gbp, hkd, jpy, sgd, or usd.
+    'au_becs_debit', //aud
+  ],
 
   // Configuration for Stripe.
   // API Keys: https://dashboard.stripe.com/account/apikeys
@@ -116,18 +80,5 @@ module.exports = {
     port: process.env.PORT || 8000,
     subdomain: process.env.NGROK_SUBDOMAIN,
     authtoken: process.env.NGROK_AUTHTOKEN,
-  },
-
-   // list mock currency FX used in this demo, all relative to EUR
-    currencyFX: {
-    'aud': 1.63,
-    'cad': 1.54,
-    'eur': 1,
-    'gbp': 0.92,
-    'hkd': 8.84,
-    'jpy': 122,
-    'nzd': 1.74,
-    'sgd': 1.59,
-    'usd': 1.14,
   },
 };

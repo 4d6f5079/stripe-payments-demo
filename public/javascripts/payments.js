@@ -16,6 +16,7 @@
 
   // Retrieve the configuration for the store.
   const config = await store.getConfig();
+  let activeCurrency = config.currency;
 
   // Create references to the main form and its submit button.
   const form = document.getElementById('payment-form');
@@ -157,7 +158,7 @@
     // Re-enable the Pay button.
     submitButton.disabled = false;
   });
-
+  
   /**
    * Implement a Stripe Payment Request Button Element.
    *
@@ -227,7 +228,6 @@
 
   // Callback when the shipping option is changed.
   paymentRequest.on('shippingoptionchange', async (event) => {
-    currency = form.querySelector('select[name=currency] option:checked').value;
     // Update the PaymentIntent to reflect the shipping cost.
     const response = await store.updatePaymentIntentWithShippingCost(
       paymentIntent.id,
@@ -243,7 +243,7 @@
     });
     const amount = store.formatPrice(
       response.paymentIntent.amount,
-      currency
+      activeCurrency,
     );
     updateSubmitButtonPayText(`Pay ${amount}`);
   });
@@ -282,14 +282,6 @@
       event.preventDefault();
       selectCountry(event.target.value);
     });
-  
-  // Listen to changes to the user-selected currency
-  form
-    .querySelector('select[name=currency]')
-    .addEventListener('change', (event) => {
-      event.preventDefault();
-      selectCurrency(event.target.value);
-    });
 
   // Submit handler for our payment form.
   form.addEventListener('submit', async (event) => {
@@ -322,14 +314,12 @@
     submitButton.textContent = 'Processing…';
 
     // Update Payment Intent if currency is different to default
-    if(config.currency !== form.querySelector('select[name=currency] option:checked').value)
+    if(config.currency !== activeCurrency)
     {
-      let currency = form.querySelector('select[name=currency] option:checked').value
-      const response = await store.updatePaymentIntentWithCurrency( 
+      const response = await store.updatePaymentIntentWithCurrencyPaymentMethod( 
         paymentIntent.id,
-        store.getLineItems(),
-        null,
-        currency,
+        activeCurrency,
+        [payment,],
         );
         
         if(response.error){
@@ -337,7 +327,7 @@
           update_error = true
         }
     }
-    if(!update_error){
+    if(!update_error){    
       if (payment === 'card') {
         // Let Stripe.js handle the confirmation of the PaymentIntent with the card Element.
         const response = await stripe.confirmCardPayment(
@@ -370,19 +360,19 @@
         );
         handlePayment(response);
       } else if (payment == 'au_becs_debit'){
-          const response = await stripe.confirmAuBecsDebitPayment(
-            paymentIntent.client_secret,
-            {
-              payment_method: {
-                au_becs_debit: becsBank,
-                billing_details: {
-                  name,
-                  email, 
-                }
+        const response = await stripe.confirmAuBecsDebitPayment(
+          paymentIntent.client_secret,
+          {
+            payment_method: {
+              au_becs_debit: becsBank,
+              billing_details: {
+                name,
+                email, 
               }
             }
-          );
-          handlePayment(response);
+          }
+        );
+        handlePayment(response);
       }
       else {
         // Prepare all the Stripe source common data.
@@ -503,7 +493,6 @@
 
   // Handle activation of payment sources not yet supported by PaymentIntents
   const handleSourceActiviation = (source) => {
-    let currency = form.querySelector('select[name=currency] option:checked').value;
     const mainElement = document.getElementById('main');
     const confirmationElement = document.getElementById('confirmation');
     switch (source.flow) {
@@ -524,7 +513,7 @@
           form.querySelector('.payment-info.wechat p').style.display = 'none';
           let amount = store.formatPrice(
             store.getPaymentTotal(),
-            currency
+            activeCurrency
           );
           updateSubmitButtonPayText(
             `Scan this QR code on WeChat to pay ${amount}`
@@ -549,7 +538,7 @@
         const receiverInfo = confirmationElement.querySelector(
           '.receiver .info'
         );
-        let amount = store.formatPrice(source.amount, currency);
+        let amount = store.formatPrice(source.amount, activeCurrency);
         switch (source.type) {
           case 'ach_credit_transfer':
             // Display the ACH Bank Transfer information to the user.
@@ -790,18 +779,9 @@
     },
   };
 
- 
-
   // Update the main button to reflect the payment method being selected.
   const updateButtonLabel = (paymentMethod, bankName) => {
-    let currency = form.querySelector('select[name=currency] option:checked').value;
-    
-    let fx = 1; // default to FX of 1
-    if(currency in config.currencyFX){
-      fx = config.currencyFX[currency];
-    }
-
-    let amount = store.formatPrice(store.getPaymentTotal() * fx, currency);
+    let amount = store.formatPrice(store.getPaymentTotal(), activeCurrency);
     let name = paymentMethods[paymentMethod].name;
     let label = `Pay ${amount}`;
     if (paymentMethod !== 'card') {
@@ -825,28 +805,20 @@
     selector.querySelector(`option[value=${country}]`).selected = 'selected';
     selector.className = `field ${country.toLowerCase()}`;
 
+    //update currency if there's a currency for that country
+    switch(country){
+      case 'AU':
+        activeCurrency = 'aud';
+        break;
+      default:
+        activeCurrency = config.currency;
+        break;
+    }
+
     // Trigger the methods to show relevant fields and payment methods on page load.
     showRelevantFormFields();
     showRelevantPaymentMethods();
   };
-
-  const selectCurrency = (currency) => {
-    const selector = document.getElementById('currency');
-    selector.querySelector(`option[value=${currency}]`).selected = 'selected';
-    selector.className = `field ${country.toLowerCase()}`;
-    
-
-    if(currency !== config.currency){
-      let fx = config.currencyFX[currency];
-      let amount = store.formatPrice(store.getPaymentTotal() * fx, currency);
-      //if the currency is different display also update the fx note
-      document.getElementById('currency-fx-info').textContent = `Converted Total: ${amount} \n(1 ${config.currency.toUpperCase()} = ${fx} ${currency.toUpperCase()})`;      
-    }
-
-    // Trigger the methods to show relevant payment methods on page load.
-    showRelevantPaymentMethods();
-  };
-
 
   // Show only form fields that are relevant to the selected country.
   const showRelevantFormFields = (country) => {
@@ -897,13 +869,9 @@
   };
 
   // Show only the payment methods that are relevant to the selected country.
-  const showRelevantPaymentMethods = (country, currency) => {
+  const showRelevantPaymentMethods = (country) => {
     if (!country) {
       country = form.querySelector('select[name=country] option:checked').value;
-    }
-
-    if(!currency) {
-      currency = form.querySelector('select[name=currency] option:checked').value;
     }
 
     const paymentInputs = form.querySelectorAll('input[name=payment]');
@@ -912,9 +880,9 @@
       input.parentElement.classList.toggle(
         'visible',
         input.value === 'card' ||
-          (config.paymentMethodsPerCurrency[currency].includes(input.value) &&
+          (config.paymentMethods.includes(input.value) &&
             paymentMethods[input.value].countries.includes(country) &&
-            paymentMethods[input.value].currencies.includes(currency))
+            paymentMethods[input.value].currencies.includes(activeCurrency))
       );
     }
 
@@ -960,8 +928,8 @@
         .querySelector('.payment-info.wechat')
         .classList.toggle('visible', payment === 'wechat');
       form
-        .querySelector('.payment-info.au_becs_debit')
-        .classList.toggle('visible', payment === 'au_becs_debit');
+      .querySelector('.payment-info.au_becs_debit')
+      .classList.toggle('visible', payment === 'au_becs_debit');
       form
         .querySelector('.payment-info.redirect')
         .classList.toggle('visible', flow === 'redirect');
