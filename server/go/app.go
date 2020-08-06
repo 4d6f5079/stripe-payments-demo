@@ -138,7 +138,6 @@ func buildEcho(publicDirectory string) *echo.Echo {
 		})
 	})
 
-<<<<<<< HEAD
 	e.POST("/payment_intents/:id/currency_payment_method_change", func(c echo.Context) error {
 		r := new(payments.IntentCurrencyPaymentMethodsChangeRequest)
 		err := c.Bind(r)
@@ -155,7 +154,7 @@ func buildEcho(publicDirectory string) *echo.Echo {
 			"paymentIntent": pi,
 		})
 	})
-=======
+	
 	type PaymentIntentsStatusData struct {
 		Status           string `json:"status"`
 		LastPaymentError string `json:"last_payment_error,omitempty"`
@@ -164,7 +163,6 @@ func buildEcho(publicDirectory string) *echo.Echo {
 	type PaymentIntentsStatus struct {
 		PaymentIntent PaymentIntentsStatusData `json:"paymentIntent"`
 	}
->>>>>>> origin/master
 
 	e.GET("/payment_intents/:id/status", func(c echo.Context) error {
 		pi, err := payments.RetrieveIntent(c.Param("id"))
