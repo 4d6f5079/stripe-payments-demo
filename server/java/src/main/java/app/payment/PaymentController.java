@@ -77,6 +77,11 @@ public class PaymentController {
         Map<String, Object> status = new HashMap<>();
         status.put("status", paymentIntent.getStatus());
 
+        
+        if (paymentIntent.getLastPaymentError() != null) {
+            status.put("last_payment_error", paymentIntent.getLastPaymentError().getMessage());
+        }
+        
         Map<String, Object> wrapper = new HashMap<String, Object>();
         wrapper.put("paymentIntent", status);
 
