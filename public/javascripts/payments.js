@@ -138,10 +138,10 @@
    * This allows you to collect australian bank account details
    */
 
-  const becsBank = elements.create('auBankAccount', {style})
+  const becsBank = elements.create('auBankAccount', {style});
 
   // Mount the BECS element on the page.
-  becsBank.mount('#becs-bank-element')
+  becsBank.mount('#becs-bank-element');
 
   // Monitor change events on the BECS Element to display any errors.
   becsBank.on('change', ({error, bankName}) => {
@@ -314,7 +314,7 @@
     submitButton.textContent = 'Processing…';
 
     // Update Payment Intent if currency is different to default
-    if(config.currency !== activeCurrency)
+    if (config.currency !== activeCurrency)
     {
       const response = await store.updatePaymentIntentWithCurrencyPaymentMethod( 
         paymentIntent.id,
@@ -322,7 +322,7 @@
         [payment,],
         );
         
-        if(response.error){
+        if (response.error){
           handleError(response);
           updateError = true
         }
@@ -855,10 +855,7 @@
     if (paymentMethod === 'wechat') {
       label = `Generate QR code to pay ${amount} with ${name}`;
     }
-    if (paymentMethod === 'sepa_debit' && bankName) {
-      label = `Debit ${amount} from ${bankName}`;
-    }
-    if (paymentMethod == 'au_becs_debit' && bankName){
+    if (['sepa_debit', 'au_becs_debit'].includes(paymentMethod) && bankName) {
       label = `Debit ${amount} from ${bankName}`;
     }
 
@@ -871,13 +868,10 @@
     selector.className = `field ${country.toLowerCase()}`;
 
     //update currency if there's a currency for that country
-    switch(country){
-      case 'AU':
+    if(country === 'AU'){
         activeCurrency = 'aud';
-        break;
-      default:
+    } else {
         activeCurrency = config.currency;
-        break;
     }
 
     // Trigger the methods to show relevant fields and payment methods on page load.
