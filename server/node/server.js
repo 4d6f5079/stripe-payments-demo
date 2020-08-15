@@ -38,7 +38,7 @@ app.use('/', require('./routes'));
 
 // Start the server on the correct port.
 const server = app.listen(config.port, () => {
-  console.log(`🚀  Server listening on port ${server.address().port}`);
+  console.log(`Server listening on port ${server.address().port}`);
 });
 
 // Turn on the ngrok tunnel in development, which provides both the mandatory HTTPS
