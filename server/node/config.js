@@ -11,7 +11,7 @@ require('dotenv').config();
 
 module.exports = {
   // Default country for the checkout form.
-  country: 'US',
+  country: 'NL',
 
   // Store currency.
   currency: 'eur',

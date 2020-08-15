@@ -12,7 +12,8 @@ const config = require('./config');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const ngrok = config.ngrok.enabled ? require('ngrok') : null;
+// const ngrok = config.ngrok.enabled ? require('ngrok') : null;
+const ngrok = null;
 const app = express();
 
 // Setup useful middleware.
