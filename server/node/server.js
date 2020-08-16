@@ -12,9 +12,15 @@ const config = require('./config');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-// const ngrok = config.ngrok.enabled ? require('ngrok') : null;
-const ngrok = null;
+const ngrok = config.ngrok.enabled ? require('ngrok') : null;
 const app = express();
+
+app.use((req, res, next) => {
+  console.log(req.ip !== "::1" ? req.ip : "No IP")
+  console.log(req.headers['x-forwarded-for'] !== "::1" ? req.headers['x-forwarded-for'] : "No x-forwarded-for")
+  console.log(req.connection.remoteAddress !== "::1" ? req.connection.remoteAddress : "No remoteAddress")
+  next()
+})
 
 // Setup useful middleware.
 app.use(
@@ -51,7 +57,7 @@ if (ngrok) {
       authtoken: config.ngrok.authtoken,
     })
     .then(url => {
-      console.log(`💳  App URL to see the demo in your browser: ${url}/`);
+      console.log(`App URL to see the demo in your browser: ${url}/`);
     })
     .catch(err => {
       if (err.code === 'ECONNREFUSED') {
